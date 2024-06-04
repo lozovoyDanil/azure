@@ -1,0 +1,11 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a simple reverse proxy API for movies and actors services",
+        "title": "Reverse Proxy API Gateway",
+        "contact": {}
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {}
+}

@@ -1,0 +1,64 @@
+package main
+
+import (
+	"log"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+)
+
+const (
+	moviesServiceAddr = "http://fastapiproject:5000"
+	actorsServiceAddr = "http://fastapiproject2:5001"
+	authServiceAddr   = "http://prj:5003"
+)
+
+var backendServices = map[string]string{
+	//Movies endpoints
+	"/api/movies/{movie_id}":       moviesServiceAddr,
+	"/api/movies":                  moviesServiceAddr,
+	"/api/movies/filterByActor":    moviesServiceAddr,
+	"/api/movies/searchByTitle":    moviesServiceAddr,
+	"/api/admin/movies/add":        moviesServiceAddr,
+	"/api/admin/movies/{movie_id}": moviesServiceAddr,
+	//Actors endpoints
+	"/api/actors":                              actorsServiceAddr,
+	"/api/actors/{actor_id}":                   actorsServiceAddr,
+	"/api/actors/searchByLastName":             actorsServiceAddr,
+	"/api/actors/searchByFirstName":            actorsServiceAddr,
+	"/api/actors/searchByFullName/{full_name}": actorsServiceAddr,
+	"/api/actors/movie/{movie_id}":             actorsServiceAddr,
+	"/api/admin/actors/add":                    actorsServiceAddr,
+	"/api/admin/actors/{actor_id}":             actorsServiceAddr,
+	//Auth endpoints
+	"/api/favorites/{movie_id}": authServiceAddr,
+	"/api/favorites":            authServiceAddr,
+	"/api/sign-up":              authServiceAddr,
+	"/api/sign-in":              authServiceAddr,
+	"/api/healthz":              authServiceAddr,
+	"/api/identity":             authServiceAddr,
+}
+
+func main() {
+	http.HandleFunc("/", handleRequest)
+	if err := http.ListenAndServe(":5050", nil); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func handleRequest(w http.ResponseWriter, r *http.Request) {
+	backendURL, ok := backendServices[r.URL.Path]
+	if !ok {
+		http.Error(w, "Not found", http.StatusNotFound)
+		return
+	}
+
+	remote, err := url.Parse(backendURL)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	proxy := httputil.NewSingleHostReverseProxy(remote)
+	proxy.ServeHTTP(w, r)
+}

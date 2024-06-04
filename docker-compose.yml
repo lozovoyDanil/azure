@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  fastapiproject:
+    build:
+      context: ./fastapiproject
+      dockerfile: ./Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo2
+
+  fastapiproject2:
+    build:
+      context: ./fastapiproject2
+      dockerfile: ./Dockerfile
+    ports:
+      - "5001:5001"
+    depends_on:
+      - mongo
+
+  gateway:
+    build:
+      context: ./gateway
+      dockerfile: ./Dockerfile
+    ports:
+      - "5050:5050"
+
+  prj:
+    build:
+      context: ./prj
+      dockerfile: ./Dockerfile
+    ports:
+      - "5003:5003"
+    depends_on:
+      - mongo3
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: users_actors
+      MONGO_INITDB_ROOT_PASSWORD: 12345
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db  
+
+  mongo2:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: 67890
+    ports:
+      - "27000:27017"
+    volumes:
+      - mongo-data2:/data/db  
+
+  mongo3:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: 12345
+    ports:
+      - "27001:27017"
+    volumes:
+      - mongo-data3:/data/db
+
+volumes:
+  mongo-data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/pylay/Desktop/azure/mongoDb
+      o: bind
+  mongo-data2:
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/pylay/Desktop/azure/mongoDb2
+      o: bind
+  mongo-data3:    
+    driver: local
+    driver_opts:
+      type: none
+      device: /home/pylay/Desktop/azure/mongoDb3
+      o: bind
